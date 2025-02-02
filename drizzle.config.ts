@@ -2,11 +2,14 @@ import { type Config } from "drizzle-kit";
 
 import { env } from "~/env";
 
-export default {
+import { defineConfig } from "drizzle-kit";
+
+export default defineConfig({
   schema: "./src/server/db/schema.ts",
-  dialect: "sqlite",
+  out: "./migrations",
+  dialect: "postgresql",
   dbCredentials: {
     url: env.DATABASE_URL,
   },
-  tablesFilter: ["drive-clone_*"],
-} satisfies Config;
+  tablesFilter: ["drive_clone_*"],
+}) satisfies Config;

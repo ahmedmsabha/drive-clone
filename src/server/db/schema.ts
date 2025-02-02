@@ -1,8 +1,11 @@
-// Example model schema from the Drizzle docs
-// https://orm.drizzle.team/docs/sql-schema-declaration
-
-import { sql } from "drizzle-orm";
-import { index, int, sqliteTableCreator, text } from "drizzle-orm/sqlite-core";
+import {
+  integer,
+  text,
+  index,
+  pgTableCreator,
+  bigint,
+  timestamp,
+} from "drizzle-orm/pg-core";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -10,21 +13,38 @@ import { index, int, sqliteTableCreator, text } from "drizzle-orm/sqlite-core";
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
-export const createTable = sqliteTableCreator((name) => `drive-clone_${name}`);
+export const createTable = pgTableCreator((name) => `drive_clone_${name}`);
 
-export const posts = createTable(
-  "post",
+export const files_table = createTable(
+  "files_table",
   {
-    id: int("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
-    name: text("name", { length: 256 }),
-    createdAt: int("created_at", { mode: "timestamp" })
-      .default(sql`(unixepoch())`)
-      .notNull(),
-    updatedAt: int("updated_at", { mode: "timestamp" }).$onUpdate(
-      () => new Date()
-    ),
+    id: bigint("id", { mode: "number" }).primaryKey().notNull(),
+    ownerId: text("owner_id").notNull(),
+    name: text("name").notNull(),
+    size: integer("size").notNull(),
+    url: text("url").notNull(),
+    parent: bigint("parent", { mode: "number" }).notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
   },
-  (example) => ({
-    nameIndex: index("name_idx").on(example.name),
-  })
+  (t) => ({
+    parentIdx: index("parent_index").on(t.parent),
+    ownerIdx: index("owner_id_index").on(t.ownerId),
+  }),
+);
+
+export type DB_FileType = typeof files_table.$inferSelect;
+
+export const folders_table = createTable(
+  "folders_table",
+  {
+    id: bigint("id", { mode: "number" }).primaryKey().notNull(),
+    ownerId: text("owner_id").notNull(),
+    name: text("name").notNull(),
+    parent: bigint("parent", { mode: "number" }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (t) => ({
+    parentIdx: index("parent_index").on(t.parent),
+    ownerIdx: index("owner_id_index").on(t.ownerId),
+  }),
 );
