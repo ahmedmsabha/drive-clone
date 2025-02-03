@@ -1,10 +1,11 @@
+import "server-only";
 import {
   integer,
-  text,
   index,
   pgTableCreator,
-  bigint,
   timestamp,
+  serial,
+  varchar,
 } from "drizzle-orm/pg-core";
 
 /**
@@ -13,22 +14,22 @@ import {
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
-export const createTable = pgTableCreator((name) => `drive_clone_${name}`);
+export const createTable = pgTableCreator((name) => `${name}`);
 
 export const files_table = createTable(
   "files_table",
   {
-    id: bigint("id", { mode: "number" }).primaryKey().notNull(),
-    ownerId: text("owner_id").notNull(),
-    name: text("name").notNull(),
+    id: serial("id").primaryKey().notNull(),
+    ownerId: varchar("owner_id").notNull(),
+    name: varchar("name").notNull(),
     size: integer("size").notNull(),
-    url: text("url").notNull(),
-    parent: bigint("parent", { mode: "number" }).notNull(),
+    url: varchar("url").notNull(),
+    parent: integer("parent").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (t) => ({
-    parentIdx: index("parent_index").on(t.parent),
-    ownerIdx: index("owner_id_index").on(t.ownerId),
+    parentId: index("files_parent_index").on(t.parent),
+    ownerId: index("files_owner_id_index").on(t.ownerId),
   }),
 );
 
@@ -37,14 +38,14 @@ export type DB_FileType = typeof files_table.$inferSelect;
 export const folders_table = createTable(
   "folders_table",
   {
-    id: bigint("id", { mode: "number" }).primaryKey().notNull(),
-    ownerId: text("owner_id").notNull(),
-    name: text("name").notNull(),
-    parent: bigint("parent", { mode: "number" }),
+    id: serial("id").primaryKey().notNull(),
+    ownerId: varchar("owner_id").notNull(),
+    name: varchar("name").notNull(),
+    parent: integer("parent"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (t) => ({
-    parentIdx: index("parent_index").on(t.parent),
-    ownerIdx: index("owner_id_index").on(t.ownerId),
+    parentIdx: index("folders_parent_index").on(t.parent),
+    ownerIdx: index("folders_owner_id_index").on(t.ownerId),
   }),
 );
