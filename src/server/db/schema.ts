@@ -1,7 +1,7 @@
 import {
   integer,
   index,
-  pgTableCreator,
+  pgTable,
   timestamp,
   serial,
   varchar,
@@ -13,9 +13,8 @@ import {
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
-export const createTable = pgTableCreator((name) => `${name}`);
 
-export const files_table = createTable(
+export const files_table = pgTable(
   "files_table",
   {
     id: serial("id").primaryKey().notNull(),
@@ -28,13 +27,13 @@ export const files_table = createTable(
   },
   (t) => ({
     parentId: index("files_parent_index").on(t.parent),
-    ownerId: index("files_owner_id_index").on(t.ownerId),
+    ownerIdIndex: index("files_owner_id_index").on(t.ownerId),
   }),
 );
 
 export type DB_FileType = typeof files_table.$inferSelect;
 
-export const folders_table = createTable(
+export const folders_table = pgTable(
   "folders_table",
   {
     id: serial("id").primaryKey().notNull(),
@@ -44,7 +43,9 @@ export const folders_table = createTable(
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (t) => ({
-    parentIdx: index("folders_parent_index").on(t.parent),
-    ownerIdx: index("folders_owner_id_index").on(t.ownerId),
+    parentId: index("folders_parent_index").on(t.parent),
+    ownerIdIndex: index("folders_owner_id_index").on(t.ownerId),
   }),
 );
+
+export type DB_FolderType = typeof folders_table.$inferSelect;

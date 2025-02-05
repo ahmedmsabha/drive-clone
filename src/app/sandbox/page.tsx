@@ -1,7 +1,7 @@
 import { db } from "~/server/db";
-import { mockFiles, mockFolders } from "~/lib/mock-data";
+import { mockFolders } from "~/lib/mock-data";
 import { folders_table } from "~/server/db/schema";
-import { files_table } from "~/server/db/schema";
+import { auth } from "@clerk/nextjs/server";
 
 export default function Sandbox() {
   return (
@@ -10,25 +10,30 @@ export default function Sandbox() {
       <form
         action={async () => {
           "use server";
+          const user = await auth();
+          if (!user.userId) {
+            throw new Error("User not found");
+          }
+          const rootFolder = await db
+            .insert(folders_table)
+            .values({
+              name: "root",
+              ownerId: user.userId,
+              parent: null,
+            })
+            .returning({
+              id: folders_table.id,
+            });
+
           const folderInsert = await db.insert(folders_table).values(
-            mockFolders.map((folder, index) => ({
-              id: index + 1,
+            mockFolders.map((folder) => ({
               name: folder.name,
-              ownerId: "1",
-              parent: index === 0 ? 1 : null,
+              ownerId: user.userId,
+              parent: rootFolder[0]!.id,
             })),
           );
-          const fileInsert = await db.insert(files_table).values(
-            mockFiles.map((file, index) => ({
-              id: index + 1,
-              name: file.name,
-              ownerId: "1",
-              size: 4096,
-              url: file.url,
-              parent: (index % 3) + 1,
-            })),
-          );
-          console.log(folderInsert, fileInsert);
+
+          console.log(folderInsert);
         }}
       >
         <button type="submit">Seed</button>

@@ -1,38 +1,26 @@
 "use client";
 import React from "react";
 import { FileRow, FolderRow } from "./file-row";
-import { ChevronRight, Upload } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import type { files_table, folders_table } from "~/server/db/schema";
 import Link from "next/link";
 import { SignInButton, UserButton } from "@clerk/nextjs";
 import { SignedOut, SignedIn } from "@clerk/nextjs";
+import { UploadButton } from "~/lib/utils/uploadthing";
+import { useRouter } from "next/navigation";
 
 export default function DriveContents({
   files,
   folders,
   parents,
+  currentFolderId,
 }: {
   files: (typeof files_table.$inferSelect)[];
   folders: (typeof folders_table.$inferSelect)[];
   parents: (typeof folders_table.$inferSelect)[];
+  currentFolderId: number;
 }) {
-  // const breadcrumbs = useMemo(() => {
-  //   const breadcrumbs = [];
-  //   let currentId = currentFolder;
-
-  //   while (currentId !== 1) {
-  //     const folder = folders.find((folder) => folder.id === currentId);
-  //     if (folder) {
-  //       breadcrumbs.unshift(folder);
-  //       currentId = folder.parent ?? 1;
-  //     } else {
-  //       break;
-  //     }
-  //   }
-
-  //   return breadcrumbs;
-  // }, [currentFolder, folders]);
-
+  const router = useRouter();
   return (
     <div className="min-h-screen bg-gray-900 p-8 text-gray-100">
       <div className="mx-auto max-w-6xl">
@@ -79,6 +67,18 @@ export default function DriveContents({
             ))}
           </ul>
         </div>
+        <UploadButton
+          endpoint="fileUploader"
+          input={{
+            folderId: currentFolderId,
+          }}
+          onBeforeUploadBegin={(files) => {
+            return files;
+          }}
+          onClientUploadComplete={() => {
+            router.refresh();
+          }}
+        />
       </div>
     </div>
   );
