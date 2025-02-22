@@ -1,17 +1,15 @@
+import { auth } from "@clerk/nextjs/server";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
-import { auth } from "@clerk/nextjs/server";
-import { MUTATIONS, QUERIES } from "~/server/db/queries";
-import { eq } from "drizzle-orm";
-import { folders_table } from "~/server/db/schema";
-import { db } from "~/server/db";
 import { z } from "zod";
+import { MUTATIONS, QUERIES } from "~/server/db/queries";
+
 const f = createUploadthing();
 
 // FileRouter for your app, can contain multiple FileRoutes
 export const ourFileRouter = {
   // Define as many FileRoutes as you like, each with a unique routeSlug
-  fileUploader: f({
+  driveUploader: f({
     blob: {
       /**
        * For full list of options and defaults, see the File Route API reference
@@ -32,13 +30,13 @@ export const ourFileRouter = {
       const user = await auth();
 
       // If you throw, the user will not be able to upload
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/only-throw-error
+      // eslint-disable-next-line @typescript-eslint/only-throw-error
       if (!user.userId) throw new UploadThingError("Unauthorized");
 
       const folder = await QUERIES.getFolderById(input.folderId);
 
       // eslint-disable-next-line @typescript-eslint/only-throw-error
-      if (!folder) throw new UploadThingError("Parent folder not found");
+      if (!folder) throw new UploadThingError("Folder not found");
 
       if (folder.ownerId !== user.userId)
         // eslint-disable-next-line @typescript-eslint/only-throw-error
