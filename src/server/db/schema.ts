@@ -5,6 +5,8 @@ import {
   timestamp,
   serial,
   varchar,
+  uniqueIndex,
+  uuid,
 } from "drizzle-orm/pg-core";
 
 /**
@@ -25,10 +27,10 @@ export const files_table = pgTable(
     parent: integer("parent").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
-  (t) => ({
-    parentId: index("files_parent_index").on(t.parent),
-    ownerIdIndex: index("files_owner_id_index").on(t.ownerId),
-  }),
+  (t) => [
+    uniqueIndex("files_parent_index").on(t.parent),
+    uniqueIndex("files_owner_id_index").on(t.ownerId),
+  ],
 );
 
 export type DB_FileType = typeof files_table.$inferSelect;
@@ -42,10 +44,10 @@ export const folders_table = pgTable(
     parent: integer("parent"),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
-  (t) => ({
-    parentId: index("folders_parent_index").on(t.parent),
-    ownerIdIndex: index("folders_owner_id_index").on(t.ownerId),
-  }),
+  (t) => [
+    uniqueIndex("folders_parent_index").on(t.parent),
+    uniqueIndex("folders_owner_id_index").on(t.ownerId),
+  ],
 );
 
 export type DB_FolderType = typeof folders_table.$inferSelect;
