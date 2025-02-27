@@ -79,6 +79,9 @@ export default function DriveContents({
           onClientUploadComplete={() => {
             router.refresh();
           }}
+          onUploadError={(error: Error) => {
+            console.error(error);
+          }}
         />
       </div>
     </div>

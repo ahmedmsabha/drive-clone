@@ -28,8 +28,8 @@ export const files_table = pgTable(
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (t) => [
-    uniqueIndex("files_parent_index").on(t.parent),
-    uniqueIndex("files_owner_id_index").on(t.ownerId),
+    index("files_parent_index").on(t.parent),
+    index("files_owner_id_index").on(t.ownerId),
   ],
 );
 
@@ -45,8 +45,8 @@ export const folders_table = pgTable(
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (t) => [
-    uniqueIndex("folders_parent_index").on(t.parent),
-    uniqueIndex("folders_owner_id_index").on(t.ownerId),
+    index("folders_parent_index").on(t.parent),
+    index("folders_owner_id_index").on(t.ownerId),
   ],
 );
 

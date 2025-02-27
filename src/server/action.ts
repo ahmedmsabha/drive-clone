@@ -1,12 +1,13 @@
+"use server";
+
 import { and, eq } from "drizzle-orm";
 import { db } from "./db";
 import { files_table } from "./db/schema";
-import { UTApi } from "uploadthing/server";
 import { auth } from "@clerk/nextjs/server";
+import { UTApi } from "uploadthing/server";
 import { cookies } from "next/headers";
-export const utApi = new UTApi({
-  token: process.env.UPLOADTHING_TOKEN,
-});
+
+const utApi = new UTApi();
 
 export async function deleteFile(fileId: number) {
   const session = await auth();
